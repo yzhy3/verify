@@ -1,13 +1,10 @@
 {
-  "name": "discord-oauth-callback",
+  "name": "verificacion-18",
   "version": "1.0.0",
-  "description": "Discord OAuth Callback Handler",
-  "main": "api/callback.js",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "dependencies": {},
-  "engines": {
-    "node": "26.x"
+  "main": "verificar.js",
+  "scripts": { "start": "node verificar.js" },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "express": "^4.19.2"
   }
 }

