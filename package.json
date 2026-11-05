@@ -1,0 +1,13 @@
+{
+  "name": "discord-oauth-callback",
+  "version": "1.0.0",
+  "description": "Discord OAuth Callback Handler",
+  "main": "api/callback.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": "18.x"
+  }
+}
