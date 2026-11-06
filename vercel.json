@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/verify/start", "destination": "/api/verify/start" },
+    { "source": "/verify/callback", "destination": "/api/verify/callback" },
+    { "source": "/verify/complete", "destination": "/api/verify/complete" },
+    { "source": "/", "destination": "/api/index" }
+  ]
+}
