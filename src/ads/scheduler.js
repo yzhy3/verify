@@ -21,7 +21,7 @@ export function buildAdEmbed() {
 }
 
 export async function runAdCycle(client) {
-  if (!store.settings.autoAds) return { skipped: true };
+  if (!store.settings.autoAds) return { skipped: true, sent: 0, partners: [] };
 
   const embed = buildAdEmbed();
   let sent = 0;
@@ -34,14 +34,10 @@ export async function runAdCycle(client) {
     }
   }
 
-  const results = await broadcast(embed);
-  return { sent, partners: results };
+  const partners = await broadcast(embed);
+  return { sent, partners };
 }
 
 export function startScheduler(client) {
   job = cron.schedule(config.adCron, () => runAdCycle(client));
-}
-
-export function stopScheduler() {
-  job?.stop();
 }

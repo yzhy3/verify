@@ -6,12 +6,13 @@ import {
 import crypto from 'node:crypto';
 import { config } from './config.js';
 import { store } from './store.js';
+import { signState } from './state.js';
 import { buildPanel, VERIFY_BUTTON_ID } from './verify/panel.js';
-import { makeState } from './verify/oauth.js';
-import { createServer } from './web/server.js';
 import { startPresence } from './ads/presence.js';
-import { startScheduler, runAdCycle, buildAdEmbed } from './ads/scheduler.js';
+import { startScheduler, runAdCycle } from './ads/scheduler.js';
 import { createAdEvent } from './ads/events.js';
+
+process.on('unhandledRejection', (err) => console.error('Unhandled:', err));
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
@@ -21,7 +22,7 @@ const client = new Client({
 const commands = [
   new SlashCommandBuilder().setName('panel').setDescription('Publica el panel de verificación')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
-  new SlashCommandBuilder().setName('publicar').setDescription('Envía la publicidad ahora a canales y aliados')
+  new SlashCommandBuilder().setName('publicar').setDescription('Envía la publicidad ahora')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
   new SlashCommandBuilder().setName('evento').setDescription('Crea un evento con el link del server')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageEvents)
@@ -33,8 +34,7 @@ const commands = [
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand(s => s.setName('add').setDescription('Añade un aliado')
       .addStringOption(o => o.setName('nombre').setDescription('Etiqueta').setRequired(true))
-      .addStringOption(o => o.setName('webhook').setDescription('URL del webhook del aliado').setRequired(true))
-      .addStringOption(o => o.setName('guild_id').setDescription('ID del servidor (para auto-join)').setRequired(false)))
+      .addStringOption(o => o.setName('webhook').setDescription('URL del webhook').setRequired(true)))
     .addSubcommand(s => s.setName('remove').setDescription('Quita un aliado')
       .addStringOption(o => o.setName('id').setDescription('ID del aliado').setRequired(true)))
     .addSubcommand(s => s.setName('list').setDescription('Lista aliados')),
@@ -47,24 +47,22 @@ const commands = [
 
 client.once(Events.ClientReady, async (c) => {
   console.log(`Conectado como ${c.user.tag}`);
+
   const rest = new REST().setToken(config.token);
-  await rest.put(Routes.applicationGuildCommands(config.clientId, config.guildId), { body: commands });
+  await rest
+    .put(Routes.applicationGuildCommands(c.user.id, config.guildId), { body: commands })
+    .then(() => console.log('Comandos desplegados.'))
+    .catch((err) => console.error('Deploy de comandos falló:', err.message));
 
   startPresence(client);
   startScheduler(client);
-
-  const app = createServer(client);
-  app.listen(3000, () => console.log('Web en :3000'));
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
     if (interaction.isButton() && interaction.customId === VERIFY_BUTTON_ID) {
-      if (store.isVerified(interaction.user.id)) {
-        return interaction.reply({ content: '✅ Ya estás verificado.', flags: MessageFlags.Ephemeral });
-      }
-      const state = makeState(interaction.user.id, interaction.guildId);
-      const url = `${config.publicUrl}/verify/start?state=${state}`;
+      const state = signState({ userId: interaction.user.id, guildId: interaction.guildId });
+      const url = `${config.verifyBaseUrl}/api/verify/start?state=${encodeURIComponent(state)}`;
       return interaction.reply({
         embeds: [new EmbedBuilder()
           .setTitle('Último paso')
@@ -85,14 +83,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (commandName === 'publicar') {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
       const r = await runAdCycle(client);
-      const ok = r.partners?.filter(p => p.ok).length ?? 0;
+      const ok = r.partners.filter(p => p.ok).length;
       return interaction.editReply(`Enviado a ${r.sent} canales y ${ok} aliados.`);
     }
 
     if (commandName === 'evento') {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-      const horas = interaction.options.getInteger('horas');
-      const start = new Date(Date.now() + horas * 3_600_000);
+      const start = new Date(Date.now() + interaction.options.getInteger('horas') * 3_600_000);
       const ev = await createAdEvent(interaction.guild, {
         name: interaction.options.getString('nombre'),
         description: interaction.options.getString('descripcion'),
@@ -104,7 +101,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     if (commandName === 'bio') {
       return interaction.reply({
-        content: `Copia y pega esto en **Ajustes → Perfil → Sobre mí**:\n\n\`\`\`\n${config.bioText}\n\`\`\`\n\nVersión corta: \`${config.invite}\``,
+        content: `Pega esto en **Ajustes → Perfil → Sobre mí**:\n\n\`\`\`\n${config.bioText}\n\`\`\`\n\nCorto: \`${config.invite}\``,
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -117,9 +114,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
           id,
           label: interaction.options.getString('nombre'),
           webhook: interaction.options.getString('webhook'),
-          guildId: interaction.options.getString('guild_id'),
         });
-        return interaction.reply({ content: `Aliado añadido con ID \`${id}\`.`, flags: MessageFlags.Ephemeral });
+        return interaction.reply({ content: `Aliado \`${id}\` añadido.`, flags: MessageFlags.Ephemeral });
       }
       if (sub === 'remove') {
         store.removePartner(interaction.options.getString('id'));

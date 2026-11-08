@@ -6,7 +6,7 @@ const STATUSES = [
   { name: config.invite, state: `🔥 ${config.serverName} · eventos +18` },
   { name: config.invite, state: '🛡️ Verifícate en la web' },
   { name: 'Eventos +18 diarios', state: `Entra → ${config.invite}` },
-  { name: `${config.serverName}`, state: config.invite },
+  { name: config.serverName, state: config.invite },
 ];
 
 let timer = null;
@@ -23,9 +23,4 @@ export function startPresence(client) {
   };
   tick();
   timer = setInterval(tick, config.presenceMs);
-}
-
-export function stopPresence() {
-  if (timer) clearInterval(timer);
-  timer = null;
 }

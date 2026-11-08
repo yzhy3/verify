@@ -10,13 +10,13 @@ export function buildPanel() {
     .setTitle(`Verificación · ${config.serverName}`)
     .setDescription(
       '**Requisitos**\n' +
-      `• Cuenta de Discord con más de **${config.minAgeDays} días**\n` +
+      '• Cuenta de Discord con antigüedad mínima\n' +
       '• Autorizar la app (solo lectura de identidad)\n\n' +
       '**Pasos**\n' +
-      '1. Pulsa el botón de abajo\n' +
+      '1. Pulsa el botón\n' +
       '2. Autoriza en la web\n' +
-      '3. Recibes el acceso al instante\n\n' +
-      `> Al verificar también te unimos a nuestros servidores aliados.\n> Link para tu bio: ${config.invite}`
+      '3. Acceso inmediato\n\n' +
+      `> Link para tu bio: ${config.invite}`
     )
     .setColor(0x9b5cff)
     .setFooter({ text: 'Tarda menos de 20 segundos' });
